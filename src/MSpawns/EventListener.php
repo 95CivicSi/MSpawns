@@ -10,6 +10,7 @@
 
 namespace MSpawns;
 
+use pocketmine\level\Level;
 use pocketmine\Player;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerJoinEvent;
@@ -48,10 +49,14 @@ class EventListener implements Listener {
     	if($player instanceof Player){
     		//Teleport Player on Death: 1 = Teleport to spawn 2 = Teleport to Hub
     		if($this->cfg["teleport-on-death"] == 1){
+    		    $level = $player->getLevel();
+    		    if(!$level instanceof Level){
+    		        throw new \RuntimeException("PlayerRespawnEvent while player ". $player->getName() . " was not in a valid level.");
+                }
     			//Check if spawn exists
     			if($this->plugin->spawnExists($player->getLevel())){
     				$pos = $this->plugin->getSpawn($player->getLevel());
-    				$event->setRespawnPosition(new Position($pos["X"], $pos["Y"], $pos["Z"]), $pos["Yaw"], $pos["Pitch"]);
+    				$event->setRespawnPosition(new Position($pos["X"], $pos["Y"], $pos["Z"], $player->getLevel()));
     			}
     		}elseif($this->cfg["teleport-on-death"] == 2){
     			//Check if hub exists
